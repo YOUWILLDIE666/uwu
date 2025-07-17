@@ -27,7 +27,7 @@ public class UwUify {
 
     private static final Map<String, String> WORD_REPLACEMENTS = new HashMap<>();
     private static final Map<Character, Character> CHAR_REPLACEMENTS = new HashMap<>();
-    private static final String[] EMOTES = {"OwO", "OwU", "UwU", ">w<", "^w^", ">_<", "O///O", ">///<", "(*ᵕ ᵕ⁎)", "(⁄ ⁄•⁄ω⁄•⁄ ⁄)", "(●´ω｀●)"};
+    private static final String[] EMOTES = {"OwO", "OwU", "UwU", ">w<", "^w^", ">_<", ":3", "O///O", ">///<", "(*ᵕ ᵕ⁎)", "(⁄ ⁄•⁄ω⁄•⁄ ⁄)", "(●´ω｀●)"};
     // hmm private static final String[] CUTE_SUFFIXES = {"~nya", "~wuw", "~kawaii", "~desu", "~chan"};
     private static final String NYA_REGEX = "(?i)(n)(?=[.,!?\\s]|$)";
     private static final String NE_REGEX = "(?i)(ne)(?=[.,!?\\s]|$)";
