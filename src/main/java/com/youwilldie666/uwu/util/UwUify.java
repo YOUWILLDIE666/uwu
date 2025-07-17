@@ -14,10 +14,13 @@ public class UwUify {
     private static final boolean bEMOTE = true; // add emoticons flag
     private static final boolean bNYA = true; // uhh flag
     private static final boolean bCHAR_REPLACE = true; // char replace flag
+    private static final boolean bCUTE_SUFFIX = true; // add cute suffix flag
+    private static final boolean bWHISPER_MODE = true; // whisper mode flag
     private static final double dST_CHANCE = 0.2; // stutter chance
     private static final double dEMO_CHANCE = 0.15; // add emoticons chance
     private static final double dNYA_CHANCE = 0.1; // add nya chance
     private static final double dEX_CHANCE = 0.25; // excitement chance
+    private static final double dCUTE_SUFFIX_CHANCE = 0.2; // cute suffix chance
     private static final int iINT = 3; // intensity (1-5 scale)
 
     // CONSTANTS
@@ -25,11 +28,14 @@ public class UwUify {
     private static final Map<String, String> WORD_REPLACEMENTS = new HashMap<>();
     private static final Map<Character, Character> CHAR_REPLACEMENTS = new HashMap<>();
     private static final String[] EMOTES = {"OwO", "OwU", "UwU", ">w<", "^w^", ">_<", "O///O", ">///<", "(*ᵕ ᵕ⁎)", "(⁄ ⁄•⁄ω⁄•⁄ ⁄)", "(●´ω｀●)"};
+    // hmm private static final String[] CUTE_SUFFIXES = {"~nya", "~wuw", "~kawaii", "~desu", "~chan"};
     private static final String NYA_REGEX = "(?i)(n)(?=[.,!?\\s]|$)";
     private static final String NE_REGEX = "(?i)(ne)(?=[.,!?\\s]|$)";
 
-
     static {
+        // idk what do i do with this lol thing ugh (i'm lazy to create a blacklist)
+        // [22:23:49] [Render thread/INFO] [minecraft/ChatComponent]: [CHAT] <Dev> wuw! uwu
+        // wtf broooooooooo
         WORD_REPLACEMENTS.put("lol", "lul"); // lol was wow lmaoo
         WORD_REPLACEMENTS.put("cat", "neko");
         WORD_REPLACEMENTS.put("boy", "kun");
@@ -44,6 +50,7 @@ public class UwUify {
         WORD_REPLACEMENTS.put("cute", "kawaii");
         WORD_REPLACEMENTS.put("friend", "fwen");
         WORD_REPLACEMENTS.put("what", "wat");
+        WORD_REPLACEMENTS.put("goodbye", "bye-bye");
 
         CHAR_REPLACEMENTS.put('l', 'w');
         CHAR_REPLACEMENTS.put('r', 'w');
@@ -52,7 +59,7 @@ public class UwUify {
         CHAR_REPLACEMENTS.put('?', '~');
     }
 
-  //  @Contract("null -> param1")
+    //  @Contract("null -> param1")
     public static String uwuify(String message) {
         return Optional.ofNullable(message)
                 .filter(msg -> !msg.isEmpty())
@@ -76,6 +83,12 @@ public class UwUify {
         }
         if (bEMOTE && RANDOM.nextDouble() < dEMO_CHANCE * (iINT / 5.0)) {
             addEmote(result);
+        }
+//        if (bCUTE_SUFFIX && RANDOM.nextDouble() < dCUTE_SUFFIX_CHANCE * (iINT / 5.0)) {
+//            addSuffix(result);
+//        }
+        if (bWHISPER_MODE) {
+            whisperMode(result);
         }
         if (RANDOM.nextDouble() < dEX_CHANCE * (iINT / 5.0)) {
             result.append(addExcitement(result.toString()));
@@ -129,6 +142,16 @@ public class UwUify {
         result.append(" ").append(emote);
     }
 
+//    private static void addSuffix(@NotNull StringBuilder result) {
+//        String suffix = CUTE_SUFFIXES[RANDOM.nextInt(CUTE_SUFFIXES.length)];
+//        result.append(suffix);
+//    }
+
+    private static void whisperMode(@NotNull StringBuilder result) {
+        String resultStr = result.toString();
+        result.setLength(0);
+        result.append(resultStr.toLowerCase());
+    }
 
     private static @NotNull String addExcitement(@NotNull String text) {
         if (text.endsWith("!")) {
