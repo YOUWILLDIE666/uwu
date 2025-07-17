@@ -14,8 +14,8 @@ public class UwUify {
     private static final boolean bEMOTE = true; // add emoticons flag
     private static final boolean bNYA = true; // uhh flag
     private static final boolean bCHAR_REPLACE = true; // char replace flag
-    private static final boolean bCUTE_SUFFIX = true; // add cute suffix flag
-    private static final boolean bWHISPER_MODE = true; // whisper mode flag
+    // private static final boolean bCUTE_SUFFIX = true; // add cute suffix flag
+    // private static final boolean bWHISPER_MODE = true; // whisper mode flag
     private static final double dST_CHANCE = 0.2; // stutter chance
     private static final double dEMO_CHANCE = 0.15; // add emoticons chance
     private static final double dNYA_CHANCE = 0.1; // add nya chance
