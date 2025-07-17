@@ -1,10 +1,10 @@
 package com.youwilldie666.uwu.util;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 public class UwUify {
@@ -20,10 +20,20 @@ public class UwUify {
     private static final double dEX_CHANCE = 0.25; // excitement chance
     private static final int iINT = 3; // intensity (1-5 scale)
 
+    // CONSTANTS
+
     private static final Map<String, String> WORD_REPLACEMENTS = new HashMap<>();
     private static final Map<Character, Character> CHAR_REPLACEMENTS = new HashMap<>();
+    private static final String[] EMOTES = {"OwO", "OwU", "UwU", ">w<", "^w^", ">_<", "O///O", ">///<", "(*ᵕ ᵕ⁎)", "(⁄ ⁄•⁄ω⁄•⁄ ⁄)", "(●´ω｀●)"};
+    private static final String NYA_REGEX = "(?i)(n)(?=[.,!?\\s]|$)";
+    private static final String NE_REGEX = "(?i)(ne)(?=[.,!?\\s]|$)";
+
 
     static {
+        WORD_REPLACEMENTS.put("lol", "lul"); // lol was wow lmaoo
+        WORD_REPLACEMENTS.put("cat", "neko");
+        WORD_REPLACEMENTS.put("boy", "kun");
+        WORD_REPLACEMENTS.put("girl", "chan");
         WORD_REPLACEMENTS.put("hello", "hewwo");
         WORD_REPLACEMENTS.put("hi", "hai");
         WORD_REPLACEMENTS.put("hey", "haii");
@@ -37,75 +47,88 @@ public class UwUify {
 
         CHAR_REPLACEMENTS.put('l', 'w');
         CHAR_REPLACEMENTS.put('r', 'w');
-        // CHAR_REPLACEMENTS.put('n', );
+
         CHAR_REPLACEMENTS.put('!', '~');
         CHAR_REPLACEMENTS.put('?', '~');
     }
 
-    /* good boy
-    public static void setStutter(boolean enabled) { stutter = enabled; }
-    public static void setEmote(boolean enabled) { emote = enabled; }
-    public static void setNya(boolean enabled) { bNYA = enabled; }
-    public static void setCharacterReplaceEnabled(boolean enabled) { cReplace = enabled; }
-    public static void setIntensity(int level) { intensity = Math.clamp(level, 1, 5); }
-    //Math.min(5, Math.max(1, level))*/
-
-    @Contract("null -> param1")
-    // p.s. i know this is a heavy function, no care
+  //  @Contract("null -> param1")
     public static String uwuify(String message) {
-        if (message == null || message.isEmpty()) {
-            return message;
-        }
-
-        String result = message.toLowerCase();
-
-        for (Map.Entry<String, String> entry : WORD_REPLACEMENTS.entrySet()) {
-            result = result.replace(entry.getKey(), entry.getValue());
-        }
-
-        if (bCHAR_REPLACE) {
-            StringBuilder charBuilder = new StringBuilder();
-            for (char c : result.toCharArray()) {
-                if (CHAR_REPLACEMENTS.containsKey(c)) {
-                    charBuilder.append(CHAR_REPLACEMENTS.get(c));
-                } else {
-                    charBuilder.append(c);
-                }
-            }
-            result = charBuilder.toString();
-        }
-
-        if (bNYA && RANDOM.nextDouble() < dNYA_CHANCE * (iINT / 5.0)) {
-            result = result.replaceAll("(?i)(n)(?=[.,!?\\s]|$)", "ny$1");
-            result = result.replaceAll("(?i)(ne)(?=[.,!?\\s]|$)", "bNYA");
-        }
-
-        if (bSTUTTER && RANDOM.nextDouble() < dST_CHANCE * (iINT / 5.0)) {
-            String[] words = result.split(" ");
-            if (words.length > 0) {
-                int idx = RANDOM.nextInt(words.length);
-                if (words[idx].length() > 2) {
-                    String firstChar = words[idx].substring(0, 1);
-                    words[idx] = firstChar + "-" + words[idx];
-                    result = String.join(" ", words);
-                }
-            }
-        }
-
-        if (bEMOTE && RANDOM.nextDouble() < dEMO_CHANCE * (iINT / 5.0)) {
-            String[] emotes = {"OwO", "OwU", "UwU", ">w<", "^w^", ">_<", "O///O", ">///<", "(*ᵕ ᵕ⁎)", "(⁄ ⁄•⁄ω⁄•⁄ ⁄)", "(●´ω｀●)"};
-            String emote = emotes[RANDOM.nextInt(emotes.length)];
-
-            int idx = RANDOM.nextInt(result.length());
-            result = result.substring(0, idx) + " " + emote + " " + result.substring(idx);
-        }
-
-        if (RANDOM.nextDouble() < dEX_CHANCE * (iINT / 5.0)) {
-            result += addExcitement(result);
-        }
-
-        return result;
+        return Optional.ofNullable(message)
+                .filter(msg -> !msg.isEmpty())
+                .map(String::toLowerCase)
+                .map(UwUify::appTrans)
+                .orElse(message);
     }
+
+    private static @NotNull String appTrans(String message) {
+        StringBuilder result = new StringBuilder(message);
+
+        replaceWords(result);
+        if (bCHAR_REPLACE) {
+            replaceChars(result);
+        }
+        if (bNYA && RANDOM.nextDouble() < dNYA_CHANCE * (iINT / 5.0)) {
+            applyNya(result);
+        }
+        if (bSTUTTER && RANDOM.nextDouble() < dST_CHANCE * (iINT / 5.0)) {
+            applyStutter(result);
+        }
+        if (bEMOTE && RANDOM.nextDouble() < dEMO_CHANCE * (iINT / 5.0)) {
+            addEmote(result);
+        }
+        if (RANDOM.nextDouble() < dEX_CHANCE * (iINT / 5.0)) {
+            result.append(addExcitement(result.toString()));
+        }
+
+        return result.toString();
+    }
+
+    private static void replaceWords(StringBuilder result) {
+        WORD_REPLACEMENTS.forEach((key, value) -> {
+            int index = result.indexOf(key);
+            while (index != -1) {
+                result.replace(index, index + key.length(), value);
+                index = result.indexOf(key, index + value.length());
+            }
+        });
+    }
+
+    private static void replaceChars(@NotNull StringBuilder result) {
+        for (int i = 0; i < result.length(); i++) {
+            char c = result.charAt(i);
+            if (CHAR_REPLACEMENTS.containsKey(c)) {
+                result.setCharAt(i, CHAR_REPLACEMENTS.get(c));
+            }
+        }
+    }
+
+    private static void applyNya(@NotNull StringBuilder result) {
+        String resultStr = result.toString();
+        resultStr = resultStr.replaceAll(NYA_REGEX, "ny$1");
+        resultStr = resultStr.replaceAll(NE_REGEX, "bNYA");
+        result.setLength(0); // clear
+        result.append(resultStr);
+    }
+
+    private static void applyStutter(@NotNull StringBuilder result) {
+        String[] words = result.toString().split(" ");
+        if (words.length > 0) {
+            int idx = RANDOM.nextInt(words.length);
+            if (words[idx].length() > 2) {
+                String firstChar = words[idx].substring(0, 1);
+                words[idx] = firstChar + "-" + words[idx];
+                result.setLength(0); // clear
+                result.append(String.join(" ", words));
+            }
+        }
+    }
+
+    private static void addEmote(@NotNull StringBuilder result) {
+        String emote = EMOTES[RANDOM.nextInt(EMOTES.length)];
+        result.append(" ").append(emote);
+    }
+
 
     private static @NotNull String addExcitement(@NotNull String text) {
         if (text.endsWith("!")) {
