@@ -19,7 +19,7 @@ import java.util.UUID;
 public abstract class MixinServerGamePacketListenerImpl {
 
     @Shadow
-    private ServerPlayer player;
+    public ServerPlayer player;
 
     protected MixinServerGamePacketListenerImpl(ServerPlayer player) {
         this.player = player;
