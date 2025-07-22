@@ -1,42 +1,29 @@
 package com.youwilldie666.uwu.util;
 
+import com.youwilldie666.Config;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 public class UwUify {
     private static final Random RANDOM = new Random();
 
-    private static final boolean bSTUTTER = true; // stutter flag
-    private static final boolean bEMOTE = true; // add emoticons flag
-    private static final boolean bNYA = true; // uhh flag
     private static final boolean bCHAR_REPLACE = true; // char replace flag
-    // private static final boolean bCUTE_SUFFIX = true; // add cute suffix flag
     private static final boolean bWHISPER_MODE = true; // whisper mode flag
-    private static final double dST_CHANCE = 0.2; // stutter chance
-    private static final double dEMO_CHANCE = 0.15; // add emoticons chance
-    private static final double dNYA_CHANCE = 0.1; // add nya chance
-    private static final double dEX_CHANCE = 0.25; // excitement chance
-    private static final double dCUTE_SUFFIX_CHANCE = 0.2; // cute suffix chance
-    private static final int iINT = 3; // intensity (1-5 scale)
+    // ^^^ ill keep it like this now
 
     // CONSTANTS
 
     private static final Map<String, String> WORD_REPLACEMENTS = new HashMap<>();
     private static final Map<Character, Character> CHAR_REPLACEMENTS = new HashMap<>();
-    private static final String[] EMOTES = {"OwO", "OwU", "UwU", ">w<", "^w^", ">_<", ":3", "O///O", ">///<", "(*ᵕ ᵕ⁎)", "(⁄ ⁄•⁄ω⁄•⁄ ⁄)", "(●´ω｀●)"};
-    // hmm private static final String[] CUTE_SUFFIXES = {"~nya", "~wuw", "~kawaii", "~desu", "~chan"};
     private static final String NYA_REGEX = "(?i)(n)(?=[.,!?\\s]|$)";
     private static final String NE_REGEX = "(?i)(ne)(?=[.,!?\\s]|$)";
 
     static {
-        // idk what do i do with this lol thing ugh (i'm lazy to create a blacklist)
-        // [22:23:49] [Render thread/INFO] [minecraft/ChatComponent]: [CHAT] <Dev> wuw! uwu
-        // wtf broooooooooo
-        WORD_REPLACEMENTS.put("lol", "lul"); // lol was wow lmaoo
+        // i should rework this sometime
+        WORD_REPLACEMENTS.put("lol", "lul");
         WORD_REPLACEMENTS.put("cat", "neko");
         WORD_REPLACEMENTS.put("boy", "kun");
         WORD_REPLACEMENTS.put("girl", "chan");
@@ -55,42 +42,41 @@ public class UwUify {
         CHAR_REPLACEMENTS.put('l', 'w');
         CHAR_REPLACEMENTS.put('r', 'w');
 
-        CHAR_REPLACEMENTS.put('!', '~');
-        CHAR_REPLACEMENTS.put('?', '~');
+//        CHAR_REPLACEMENTS.put('!', '~');
+//        CHAR_REPLACEMENTS.put('?', '~');
     }
 
-    //  @Contract("null -> param1")
-    public static String uwuify(String message) {
-        return Optional.ofNullable(message)
+    @Contract("_ -> param1")
+    public static String uwuify(@NotNull String message) {
+        return Optional.of(message)
                 .filter(msg -> !msg.isEmpty())
                 .map(String::toLowerCase)
-                .map(UwUify::appTrans)
+                .map(UwUify::apply)
                 .orElse(message);
     }
 
-    private static @NotNull String appTrans(String message) {
+    private static @NotNull String apply(String message) {
         StringBuilder result = new StringBuilder(message);
+
+        int iINT = getIntensity();
 
         replaceWords(result);
         if (bCHAR_REPLACE) {
             replaceChars(result);
         }
-        if (bNYA && RANDOM.nextDouble() < dNYA_CHANCE * (iINT / 5.0)) {
+        if (getNyaToggle() && RANDOM.nextDouble() < getNyaChance() * (iINT / 5.0)) {
             applyNya(result);
         }
-        if (bSTUTTER && RANDOM.nextDouble() < dST_CHANCE * (iINT / 5.0)) {
+        if (getStutterToggle() && RANDOM.nextDouble() < getStutterChance() * (iINT / 5.0)) {
             applyStutter(result);
         }
-        if (bEMOTE && RANDOM.nextDouble() < dEMO_CHANCE * (iINT / 5.0)) {
+        if (getEmoticonToggle() && RANDOM.nextDouble() < getEmoticonChance() * (iINT / 5.0)) {
             addEmote(result);
         }
-//        if (bCUTE_SUFFIX && RANDOM.nextDouble() < dCUTE_SUFFIX_CHANCE * (iINT / 5.0)) {
-//            addSuffix(result);
-//        }
         if (bWHISPER_MODE) {
             whisperMode(result);
         }
-        if (RANDOM.nextDouble() < dEX_CHANCE * (iINT / 5.0)) {
+        if (RANDOM.nextDouble() < getExcitementChance() * (iINT / 5.0)) {
             result.append(addExcitement(result.toString()));
         }
 
@@ -138,14 +124,10 @@ public class UwUify {
     }
 
     private static void addEmote(@NotNull StringBuilder result) {
-        String emote = EMOTES[RANDOM.nextInt(EMOTES.length)];
-        result.append(" ").append(emote);
+        List<String> emoticons = getEmoticonList();
+        String emoticon = emoticons.get(RANDOM.nextInt(emoticons.size()));
+        result.append(" ").append(emoticon);
     }
-
-//    private static void addSuffix(@NotNull StringBuilder result) {
-//        String suffix = CUTE_SUFFIXES[RANDOM.nextInt(CUTE_SUFFIXES.length)];
-//        result.append(suffix);
-//    }
 
     private static void whisperMode(@NotNull StringBuilder result) {
         String resultStr = result.toString();
@@ -164,4 +146,54 @@ public class UwUify {
             return RANDOM.nextBoolean() ? "! uwu" : "! >w<";
         }
     }
+
+
+    //////////////////////////////////////////////////////////\\
+
+    private static @NotNull Integer getIntensity() {
+        return Config.INTENSITY.get();
+    }
+
+    //////////////////////////////////////////////////////////
+
+    private static @NotNull Double getStutterChance() {
+        return Config.STUTTER_CHANCE.get();
+    }
+
+    private static @NotNull Double getEmoticonChance() {
+        return Config.EMOTICON_CHANCE.get();
+    }
+
+    private static @NotNull Double getNyaChance() {
+        return Config.NYA_CHANCE.get();
+    }
+
+    private static @NotNull Double getExcitementChance() {
+        return Config.EXCITEMENT_CHANCE.get();
+    }
+
+    //////////////////////////////////////////////////////////
+
+    private static @NotNull Boolean getStutterToggle() {
+        return Config.STUTTER_TOGGLE.get();
+    }
+
+    private static @NotNull Boolean getEmoticonToggle() {
+        return Config.EMOTICON_TOGGLE.get();
+    }
+
+    private static @NotNull Boolean getNyaToggle() {
+        return Config.NYA_TOGGLE.get();
+    }
+
+    //////////////////////////////////////////////////////////
+
+    @Contract(" -> new")
+    private static @NotNull @UnmodifiableView List<String> getEmoticonList() {
+        return Collections.unmodifiableList(Config.EMOTICON_LIST.get());
+    }
+
+    //////////////////////////////////////////////////////////
+
+
 }

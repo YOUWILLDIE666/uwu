@@ -1,0 +1,14 @@
+{
+  "uwu.configuration.section.uwu.common.toml": "AAAAAAAAAAAAAAAAAAAAAAA",
+  "uwu.configuration.title": "UwU Configuration",
+  "uwu.configuration.section.uwu.common.toml.title": "UwU Common Configuration",
+  "uwu.configuration.intensity": "Intensity",
+  "uwu.configuration.nya_chance": "Nya Chance",
+  "uwu.configuration.emoticon_list": "Emoticon List",
+  "uwu.configuration.stutter_toggle": "Toggle Stuttering",
+  "uwu.configuration.emoticon_toggle": "Toggle Emoticon Insertion",
+  "uwu.configuration.nya_toggle": "Toggle \"nya\" Insertion",
+  "uwu.configuration.stutter_chance": "Stutter Chance",
+  "uwu.configuration.excitement_chance": "Excitement Chance",
+  "uwu.configuration.emoticon_chance": "Emoticon Insertion Chance"
+}

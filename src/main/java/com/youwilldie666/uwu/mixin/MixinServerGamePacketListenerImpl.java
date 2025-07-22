@@ -28,10 +28,9 @@ public abstract class MixinServerGamePacketListenerImpl {
     @Inject(method = "handleChat", at = @At("HEAD"), cancellable = true)
     public void onChatMessage(@NotNull ServerboundChatPacket packet, @NotNull CallbackInfo ci) {
         String orig = packet.message();
-        String uwu = UwUify.uwuify(orig.toLowerCase());
 
         SignedMessageBody signedBody = new SignedMessageBody(
-                uwu,
+                UwUify.uwuify(orig),
                 Instant.now(),
                 0L,
                 LastSeenMessages.EMPTY
@@ -55,7 +54,6 @@ public abstract class MixinServerGamePacketListenerImpl {
 
         player.sendChatMessage(outgoingMessage, false, ChatType.bind(ChatType.CHAT, player));
 
-        // haha L
         ci.cancel();
     }
 }

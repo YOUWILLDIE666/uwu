@@ -1,22 +1,24 @@
 package com.youwilldie666.uwu;
 
+import com.youwilldie666.Config;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-// The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(Uwu.MOD_ID)
 public class Uwu {
-    // Define mod id in a common place for everything to reference
     public static final String MOD_ID = "uwu";
 
-    public Uwu(@NotNull IEventBus modEventBus) {
-        // Register the commonSetup method for modloading
+    public Uwu(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
+        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
     }
-
 }
