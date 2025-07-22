@@ -1,6 +1,5 @@
 package com.youwilldie666.uwu;
 
-import com.youwilldie666.Config;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;

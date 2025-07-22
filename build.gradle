@@ -48,7 +48,8 @@ neoForge {
 
         data {
             clientData()
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/')
+                    .getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
 
         configureEach {
@@ -103,8 +104,6 @@ publishing {
     publications {
         register('mavenJava', MavenPublication) {
             from components.java
-
-            artifactId = "${mod_name}-${minecraft_version}-${mod_version}"
         }
     }
     repositories {

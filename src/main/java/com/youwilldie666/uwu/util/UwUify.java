@@ -1,17 +1,19 @@
 package com.youwilldie666.uwu.util;
 
-import com.youwilldie666.Config;
+import com.youwilldie666.uwu.Config;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UwUify {
     private static final Random RANDOM = new Random();
 
-    private static final boolean bCHAR_REPLACE = true; // char replace flag
-    private static final boolean bWHISPER_MODE = true; // whisper mode flag
+    private static final boolean CHAR_REPLACE_ENABLED = true; // char replace flag
+    private static final boolean WHISPER_MODE_ENABLED = true; // whisper mode flag
     // ^^^ ill keep it like this now
 
     // CONSTANTS
@@ -21,7 +23,9 @@ public class UwUify {
     private static final String NYA_REGEX = "(?i)(n)(?=[.,!?\\s]|$)";
     private static final String NE_REGEX = "(?i)(ne)(?=[.,!?\\s]|$)";
 
-    static {
+    static { initReplacements(); }
+
+    private static void initReplacements() {
         // i should rework this sometime
         WORD_REPLACEMENTS.put("lol", "lul");
         WORD_REPLACEMENTS.put("cat", "neko");
@@ -47,49 +51,40 @@ public class UwUify {
     }
 
     @Contract("_ -> param1")
-    public static String uwuify(@NotNull String message) {
-        return Optional.of(message)
-                .filter(msg -> !msg.isEmpty())
-                .map(String::toLowerCase)
-                .map(UwUify::apply)
-                .orElse(message);
+    public static @NotNull String uwuify(@NotNull String message) {
+        if (message.isEmpty()) {
+            return message;
+        }
+        return applyTransformations(message.toLowerCase());
     }
 
-    private static @NotNull String apply(String message) {
+    private static @NotNull String applyTransformations(String message) {
         StringBuilder result = new StringBuilder(message);
-
-        int iINT = getIntensity();
+        int intensity = getIntensity();
 
         replaceWords(result);
-        if (bCHAR_REPLACE) {
+        if (CHAR_REPLACE_ENABLED) {
             replaceChars(result);
         }
-        if (getNyaToggle() && RANDOM.nextDouble() < getNyaChance() * (iINT / 5.0)) {
-            applyNya(result);
-        }
-        if (getStutterToggle() && RANDOM.nextDouble() < getStutterChance() * (iINT / 5.0)) {
-            applyStutter(result);
-        }
-        if (getEmoticonToggle() && RANDOM.nextDouble() < getEmoticonChance() * (iINT / 5.0)) {
-            addEmote(result);
-        }
-        if (bWHISPER_MODE) {
-            whisperMode(result);
-        }
-        if (RANDOM.nextDouble() < getExcitementChance() * (iINT / 5.0)) {
-            result.append(addExcitement(result.toString()));
-        }
+        applyOptional(result, intensity);
 
         return result.toString();
     }
 
     private static void replaceWords(StringBuilder result) {
         WORD_REPLACEMENTS.forEach((key, value) -> {
-            int index = result.indexOf(key);
-            while (index != -1) {
-                result.replace(index, index + key.length(), value);
-                index = result.indexOf(key, index + value.length());
+            String regex = "\\b" + Pattern.quote(key) + "\\b";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(result);
+
+            StringBuilder sb = new StringBuilder();
+            while (matcher.find()) {
+                matcher.appendReplacement(sb, value);
             }
+            matcher.appendTail(sb);
+
+            result.setLength(0);
+            result.append(sb);
         });
     }
 
@@ -99,6 +94,24 @@ public class UwUify {
             if (CHAR_REPLACEMENTS.containsKey(c)) {
                 result.setCharAt(i, CHAR_REPLACEMENTS.get(c));
             }
+        }
+    }
+
+    private static void applyOptional(@NotNull StringBuilder result, int intensity) {
+        if (getNyaToggle() && RANDOM.nextDouble() < getNyaChance() * (intensity / 5.0)) {
+            applyNya(result);
+        }
+        if (getStutterToggle() && RANDOM.nextDouble() < getStutterChance() * (intensity / 5.0)) {
+            applyStutter(result);
+        }
+        if (getEmoticonToggle() && RANDOM.nextDouble() < getEmoticonChance() * (intensity / 5.0)) {
+            addEmote(result);
+        }
+        if (WHISPER_MODE_ENABLED) {
+            whisperMode(result);
+        }
+        if (RANDOM.nextDouble() < getExcitementChance() * (intensity / 5.0)) {
+            result.append(addExcitement(result.toString()));
         }
     }
 
@@ -125,8 +138,10 @@ public class UwUify {
 
     private static void addEmote(@NotNull StringBuilder result) {
         List<String> emoticons = getEmoticonList();
-        String emoticon = emoticons.get(RANDOM.nextInt(emoticons.size()));
-        result.append(" ").append(emoticon);
+        if (!emoticons.isEmpty()) {
+            String emoticon = emoticons.get(RANDOM.nextInt(emoticons.size()));
+            result.append(" ").append(emoticon);
+        }
     }
 
     private static void whisperMode(@NotNull StringBuilder result) {
@@ -142,9 +157,9 @@ public class UwUify {
             return "!";
         } else if (text.endsWith("?")) {
             return "?!";
-        } else {
-            return RANDOM.nextBoolean() ? "! uwu" : "! >w<";
         }
+        // meh
+        return "";
     }
 
 

@@ -1,4 +1,4 @@
-package com.youwilldie666;
+package com.youwilldie666.uwu;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
