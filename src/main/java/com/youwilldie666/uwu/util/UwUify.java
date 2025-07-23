@@ -13,8 +13,7 @@ public class UwUify {
     private static final Random RANDOM = new Random();
 
     private static final boolean CHAR_REPLACE_ENABLED = true; // char replace flag
-    private static final boolean WHISPER_MODE_ENABLED = true; // whisper mode flag
-    // ^^^ ill keep it like this now
+    // ^^^ ill keep it like this for now
 
     // CONSTANTS
 
@@ -23,17 +22,16 @@ public class UwUify {
     private static final String NYA_REGEX = "(?i)(n)(?=[.,!?\\s]|$)";
     private static final String NE_REGEX = "(?i)(ne)(?=[.,!?\\s]|$)";
 
+    private static Set<Integer> replaced = new HashSet<>(); // DO NOT FINALIZE
+
     static { initReplacements(); }
 
     private static void initReplacements() {
-        // i should rework this sometime
         WORD_REPLACEMENTS.put("lol", "lul");
         WORD_REPLACEMENTS.put("cat", "neko");
         WORD_REPLACEMENTS.put("boy", "kun");
         WORD_REPLACEMENTS.put("girl", "chan");
-        WORD_REPLACEMENTS.put("hello", "hewwo");
-        WORD_REPLACEMENTS.put("hi", "hai");
-        WORD_REPLACEMENTS.put("hey", "haii");
+        WORD_REPLACEMENTS.put("hey", "hiii");
         WORD_REPLACEMENTS.put("love", "wuv");
         WORD_REPLACEMENTS.put("you", "u");
         WORD_REPLACEMENTS.put("your", "ur");
@@ -41,21 +39,18 @@ public class UwUify {
         WORD_REPLACEMENTS.put("cute", "kawaii");
         WORD_REPLACEMENTS.put("friend", "fwen");
         WORD_REPLACEMENTS.put("what", "wat");
-        WORD_REPLACEMENTS.put("goodbye", "bye-bye");
+        WORD_REPLACEMENTS.put("roar", "rawr");
 
         CHAR_REPLACEMENTS.put('l', 'w');
         CHAR_REPLACEMENTS.put('r', 'w');
-
-//        CHAR_REPLACEMENTS.put('!', '~');
-//        CHAR_REPLACEMENTS.put('?', '~');
     }
 
     @Contract("_ -> param1")
     public static @NotNull String uwuify(@NotNull String message) {
-        if (message.isEmpty()) {
+        if (message.isEmpty() || message.matches("^[\\p{Punct}\\d]+$")) {
             return message;
         }
-        return applyTransformations(message.toLowerCase());
+        return applyTransformations(message);
     }
 
     private static @NotNull String applyTransformations(String message) {
@@ -73,15 +68,36 @@ public class UwUify {
 
     private static void replaceWords(StringBuilder result) {
         WORD_REPLACEMENTS.forEach((key, value) -> {
-            String regex = "\\b" + Pattern.quote(key) + "\\b";
+            String regex = "(?i)\\b" + Pattern.quote(key) + "\\b";
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(result);
 
             StringBuilder sb = new StringBuilder();
+            int l = 0;
+
             while (matcher.find()) {
-                matcher.appendReplacement(sb, value);
+                sb.append(result, l, matcher.start());
+
+                String replacement = value;
+                String matched = matcher.group();
+
+                for (int i = 0; i < matched.length(); i++) {
+                    char orig = matched.charAt(i);
+                    if (Character.isUpperCase(orig)) {
+                        replacement = replacement.substring(0, i) +
+                                Character.toUpperCase(replacement.charAt(i)) +
+                                replacement.substring(i + 1);
+                    }
+                }
+                sb.append(replacement);
+
+                for (int i = matcher.start(); i < matcher.end(); i++) {
+                    replaced.add(i);
+                }
+
+                l =  matcher.end();
             }
-            matcher.appendTail(sb);
+            sb.append(result, l, result.length());
 
             result.setLength(0);
             result.append(sb);
@@ -90,24 +106,37 @@ public class UwUify {
 
     private static void replaceChars(@NotNull StringBuilder result) {
         for (int i = 0; i < result.length(); i++) {
+            if (replaced.contains(i)) {
+                continue;
+            }
+
+            String word = getWordAtIdx(result, i);
+            if (getBlacklist().contains(word.toLowerCase())) {
+                continue;
+            }
+
             char c = result.charAt(i);
             if (CHAR_REPLACEMENTS.containsKey(c)) {
-                result.setCharAt(i, CHAR_REPLACEMENTS.get(c));
+                char replacement = CHAR_REPLACEMENTS.get(c);
+                if (Character.isUpperCase(c)) {
+                    replacement = Character.toUpperCase(replacement);
+                }
+                result.setCharAt(i, replacement);
             }
         }
     }
 
     private static void applyOptional(@NotNull StringBuilder result, int intensity) {
-        if (getNyaToggle() && RANDOM.nextDouble() < getNyaChance() * (intensity / 5.0)) {
+        if (isNyaToggleEnabled() && RANDOM.nextDouble() < getNyaChance() * (intensity / 5.0)) {
             applyNya(result);
         }
-        if (getStutterToggle() && RANDOM.nextDouble() < getStutterChance() * (intensity / 5.0)) {
+        if (isStutterToggleEnabled() && RANDOM.nextDouble() < getStutterChance() * (intensity / 5.0)) {
             applyStutter(result);
         }
-        if (getEmoticonToggle() && RANDOM.nextDouble() < getEmoticonChance() * (intensity / 5.0)) {
+        if (isEmoticonToggleEnabled() && RANDOM.nextDouble() < getEmoticonChance() * (intensity / 5.0)) {
             addEmote(result);
         }
-        if (WHISPER_MODE_ENABLED) {
+        if (isWhisperModeToggleEnabled()) {
             whisperMode(result);
         }
         if (RANDOM.nextDouble() < getExcitementChance() * (intensity / 5.0)) {
@@ -151,19 +180,34 @@ public class UwUify {
     }
 
     private static @NotNull String addExcitement(@NotNull String text) {
-        if (text.endsWith("!")) {
-            return "!!";
-        } else if (text.endsWith(".") || text.endsWith("~")) {
-            return "!";
-        } else if (text.endsWith("?")) {
-            return "?!";
-        }
-        // meh
-        return "";
+        char last = text.charAt(text.length() - 1);
+        return switch (last) {
+            case '!' -> "!!";
+            case '.', '~' -> "!";
+            case '?' -> "?!";
+            default -> "";
+        };
     }
 
 
-    //////////////////////////////////////////////////////////\\
+    //////////////////////////////////////////////////////////
+
+    /**
+     * Helper method to retrieve the word at a specific index
+     */
+    private static String getWordAtIdx(StringBuilder result, int idx) {
+        int start = idx;
+        while (start > 0 && !Character.isWhitespace(result.charAt(start - 1))) {
+            start--;
+        }
+        int end = start;
+        while (end < result.length() && Character.isWhitespace(result.charAt(end))) {
+            end++;
+        }
+        return result.substring(start, end);
+    }
+
+    //////////////////////////////////////////////////////////
 
     private static @NotNull Integer getIntensity() {
         return Config.INTENSITY.get();
@@ -189,16 +233,20 @@ public class UwUify {
 
     //////////////////////////////////////////////////////////
 
-    private static @NotNull Boolean getStutterToggle() {
+    private static @NotNull Boolean isStutterToggleEnabled() {
         return Config.STUTTER_TOGGLE.get();
     }
 
-    private static @NotNull Boolean getEmoticonToggle() {
+    private static @NotNull Boolean isEmoticonToggleEnabled() {
         return Config.EMOTICON_TOGGLE.get();
     }
 
-    private static @NotNull Boolean getNyaToggle() {
+    private static @NotNull Boolean isNyaToggleEnabled() {
         return Config.NYA_TOGGLE.get();
+    }
+
+    private static @NotNull Boolean isWhisperModeToggleEnabled() {
+        return Config.WHISPER_MODE_TOGGLE.get();
     }
 
     //////////////////////////////////////////////////////////
@@ -206,6 +254,11 @@ public class UwUify {
     @Contract(" -> new")
     private static @NotNull @UnmodifiableView List<String> getEmoticonList() {
         return Collections.unmodifiableList(Config.EMOTICON_LIST.get());
+    }
+
+    @Contract(" -> new")
+    private static @NotNull @UnmodifiableView List<String> getBlacklist() {
+        return Collections.unmodifiableList(Config.BLACKLIST.get());
     }
 
     //////////////////////////////////////////////////////////

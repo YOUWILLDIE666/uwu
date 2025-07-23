@@ -15,38 +15,43 @@ public class Config {
 
     public static final ModConfigSpec.ConfigValue<Double> STUTTER_CHANCE = BUILDER
             .comment("Changes the stutter chance")
-            .translation("uwu.configuration.stutter_chance") // -
+            .translation("uwu.configuration.stutter_chance")
             .defineInRange("stutterChance", .2, 0., 1.);
 
     public static final ModConfigSpec.ConfigValue<Boolean> STUTTER_TOGGLE = BUILDER
             .comment("Toggles stuttering")
-            .translation("uwu.configuration.stutter_toggle") // -
+            .translation("uwu.configuration.stutter_toggle")
             .define("stutterToggle", true);
 
     public static final ModConfigSpec.ConfigValue<Double> EMOTICON_CHANCE = BUILDER
             .comment("Changes the chance of randomly inserting an emoticon at the end of your message")
-            .translation("uwu.configuration.emoticon_chance") // -
+            .translation("uwu.configuration.emoticon_chance")
             .defineInRange("emoticonChance", .15, 0., 1.);
 
     public static final ModConfigSpec.ConfigValue<Boolean> EMOTICON_TOGGLE = BUILDER
             .comment("Toggles emoticon insertion")
-            .translation("uwu.configuration.emoticon_toggle") // -
+            .translation("uwu.configuration.emoticon_toggle")
             .define("emoticonToggle", true);
 
     public static final ModConfigSpec.ConfigValue<Double> NYA_CHANCE = BUILDER
             .comment("Changes the chance of randomly inserting a \"nya\" at the end of your message")
-            .translation("uwu.configuration.nya_chance") // -
+            .translation("uwu.configuration.nya_chance")
             .defineInRange("nyaChance", .1, 0., 1.);
 
     public static final ModConfigSpec.ConfigValue<Boolean> NYA_TOGGLE = BUILDER
             .comment("Toggles the \"nya\" insertion")
-            .translation("uwu.configuration.nya_toggle") // -
+            .translation("uwu.configuration.nya_toggle")
             .define("nyaToggle", true);
 
     public static final ModConfigSpec.ConfigValue<Double> EXCITEMENT_CHANCE = BUILDER
             .comment("Changes the chance of randomly inserting excitement punctuation at the end of your message")
-            .translation("uwu.configuration.excitement_chance") // -
+            .translation("uwu.configuration.excitement_chance")
             .defineInRange("excitementChance", .25, 0., 1.);
+
+    public static final ModConfigSpec.ConfigValue<Boolean> WHISPER_MODE_TOGGLE = BUILDER
+            .comment("Makes everything you send lowercase")
+            .translation("uwu.configuration.whisper_mode_toggle")
+            .define("whisperModeToggle", false);
 
     public static final ModConfigSpec.ConfigValue<List<? extends String>> EMOTICON_LIST = BUILDER
             .comment("List of emoticons that would get inserted at the end of your message")
@@ -55,6 +60,16 @@ public class Config {
                     "emoticonList",
                     Arrays.asList("OwO", "OwU", "UwU", ">w<", "^w^", ">_<", ":3", "O///O",
                             ">///<", "(*ᵕ ᵕ⁎)", "(⁄ ⁄•⁄ω⁄•⁄ ⁄)", "(●´ω｀●)"),
+                    () -> "",
+                    element -> element instanceof String string && !string.isEmpty()
+            );
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> BLACKLIST = BUILDER
+            .comment("Words in the blacklist won't get their characters replaced (pretty much for words that contain \"l\" or \"r\")")
+            .translation("uwu.configuration.blacklist")
+            .defineList(
+                    "blacklist",
+                    Arrays.asList("lmao", "pls", "rekt"),
                     () -> "",
                     element -> element instanceof String string && !string.isEmpty()
             );
