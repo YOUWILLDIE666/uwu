@@ -107,7 +107,7 @@ public class UwUify {
     }
 
     private static void replaceChars(@NotNull StringBuilder result) {
-        for (int i = 0; i < result.length(); i++) {
+        for (int i = 0; i < result.length(); ++i) {
             if (replaced.contains(i)) {
                 continue;
             }
@@ -204,7 +204,7 @@ public class UwUify {
         while (start > 0 && !isWordBoundary(result.charAt(start - 1))) {
             start--;
         }
-        int end = start;
+        int end = idx;
         while (end < result.length() && !isWordBoundary(result.charAt(end))) {
             end++;
         }

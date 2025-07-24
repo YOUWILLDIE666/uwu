@@ -58,7 +58,7 @@ public class Config {
             .translation("uwu.configuration.emoticon_list")
             .defineList(
                     "emoticonList",
-                    Arrays.asList("OwO", "OwU", "UwU", ">w<", "^w^", ">_<", ":3", "O///O",
+                    Arrays.asList("OwO", "OwU", "UwU", "QwQ", ">w<", "^w^", ">_<", ":3", "O///O",
                             ">///<", "(*ᵕ ᵕ⁎)", "(⁄ ⁄•⁄ω⁄•⁄ ⁄)", "(●´ω｀●)"),
                     () -> "",
                     element -> element instanceof String string && !string.isEmpty()
