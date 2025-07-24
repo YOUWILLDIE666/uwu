@@ -24,6 +24,10 @@ public class UwUify {
 
     private static Set<Integer> replaced = new HashSet<>(); // DO NOT FINALIZE
 
+    static {
+        initReplacements();
+    }
+
     private static void initReplacements() {
         WORD_REPLACEMENTS.put("lol", "lul");
         WORD_REPLACEMENTS.put("cat", "neko");
@@ -42,8 +46,6 @@ public class UwUify {
         CHAR_REPLACEMENTS.put('l', 'w');
         CHAR_REPLACEMENTS.put('r', 'w');
     }
-
-    static { initReplacements(); }
 
     @Contract("_ -> param1")
     public static @NotNull String uwuify(@NotNull String message) {
@@ -84,10 +86,10 @@ public class UwUify {
                 for (int i = 0; i < matched.length(); i++) {
                     char orig = matched.charAt(i);
                     if (Character.isUpperCase(orig) && i < replacement.length()) {
-                            replacement = replacement.substring(0, i) +
-                                    Character.toUpperCase(replacement.charAt(i)) +
-                                    replacement.substring(i + 1);
-                        }
+                        replacement = replacement.substring(0, i) +
+                                Character.toUpperCase(replacement.charAt(i)) +
+                                replacement.substring(i + 1);
+                    }
                 }
                 sb.append(replacement);
 
@@ -95,7 +97,7 @@ public class UwUify {
                     replaced.add(i);
                 }
 
-                l =  matcher.end();
+                l = matcher.end();
             }
             sb.append(result, l, result.length());
 
@@ -199,23 +201,30 @@ public class UwUify {
      */
     private static String getWordAtIdx(StringBuilder result, int idx) {
         int start = idx;
-        while (start > 0 && !Character.isWhitespace(result.charAt(start - 1))) {
+        while (start > 0 && !isWordBoundary(result.charAt(start - 1))) {
             start--;
         }
         int end = start;
-        while (end < result.length() && Character.isWhitespace(result.charAt(end))) {
+        while (end < result.length() && !isWordBoundary(result.charAt(end))) {
             end++;
         }
         return result.substring(start, end);
     }
 
-    //////////////////////////////////////////////////////////
+    /**
+     * Helper method to determine if a character is a word boundary
+     */
+    private static boolean isWordBoundary(char c) {
+        return Character.isWhitespace(c) || !Character.isLetterOrDigit(c);
+    }
+
+    /// ///////////////////////////////////////////////////////
 
     private static @NotNull Integer getIntensity() {
         return Config.INTENSITY.get();
     }
 
-    //////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////
 
     private static @NotNull Double getStutterChance() {
         return Config.STUTTER_CHANCE.get();
@@ -233,7 +242,7 @@ public class UwUify {
         return Config.EXCITEMENT_CHANCE.get();
     }
 
-    //////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////
 
     private static @NotNull Boolean isStutterToggleEnabled() {
         return Config.STUTTER_TOGGLE.get();
@@ -251,7 +260,7 @@ public class UwUify {
         return Config.WHISPER_MODE_TOGGLE.get();
     }
 
-    //////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////
 
     @Contract(" -> new")
     private static @NotNull @UnmodifiableView List<String> getEmoticonList() {

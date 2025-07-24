@@ -23,11 +23,10 @@ import java.util.UUID;
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class MixinServerGamePacketListenerImpl {
 
-    @Shadow
-    public ServerPlayer player;
-
     @Unique
     private static final SecureRandom uwu$secureRandom = new SecureRandom();
+    @Shadow
+    public ServerPlayer player;
 
     protected MixinServerGamePacketListenerImpl(ServerPlayer player) {
         this.player = player;

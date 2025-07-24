@@ -1,5 +1,5 @@
 license = "${mod_license}"
-issueTrackerURL="https://github.com/YOUWILLDIE666/uwu/issues"
+issueTrackerURL = "https://github.com/YOUWILLDIE666/uwu/issues"
 
 [[mods]] #mandatory
 modId = "${mod_id}" #mandatory
