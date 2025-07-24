@@ -69,7 +69,7 @@ public class Config {
             .translation("uwu.configuration.blacklist")
             .defineList(
                     "blacklist",
-                    Arrays.asList("lmao", "pls", "rekt"),
+                    Arrays.asList("lmao", "pls", "rekt", "roar"),
                     () -> "",
                     element -> element instanceof String string && !string.isEmpty()
             );

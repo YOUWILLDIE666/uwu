@@ -24,8 +24,6 @@ public class UwUify {
 
     private static Set<Integer> replaced = new HashSet<>(); // DO NOT FINALIZE
 
-    static { initReplacements(); }
-
     private static void initReplacements() {
         WORD_REPLACEMENTS.put("lol", "lul");
         WORD_REPLACEMENTS.put("cat", "neko");
@@ -44,6 +42,8 @@ public class UwUify {
         CHAR_REPLACEMENTS.put('l', 'w');
         CHAR_REPLACEMENTS.put('r', 'w');
     }
+
+    static { initReplacements(); }
 
     @Contract("_ -> param1")
     public static @NotNull String uwuify(@NotNull String message) {
@@ -83,11 +83,11 @@ public class UwUify {
 
                 for (int i = 0; i < matched.length(); i++) {
                     char orig = matched.charAt(i);
-                    if (Character.isUpperCase(orig)) {
-                        replacement = replacement.substring(0, i) +
-                                Character.toUpperCase(replacement.charAt(i)) +
-                                replacement.substring(i + 1);
-                    }
+                    if (Character.isUpperCase(orig) && i < replacement.length()) {
+                            replacement = replacement.substring(0, i) +
+                                    Character.toUpperCase(replacement.charAt(i)) +
+                                    replacement.substring(i + 1);
+                        }
                 }
                 sb.append(replacement);
 
@@ -116,8 +116,10 @@ public class UwUify {
             }
 
             char c = result.charAt(i);
-            if (CHAR_REPLACEMENTS.containsKey(c)) {
-                char replacement = CHAR_REPLACEMENTS.get(c);
+            char lowerC = Character.toLowerCase(c);
+
+            if (CHAR_REPLACEMENTS.containsKey(lowerC)) {
+                char replacement = CHAR_REPLACEMENTS.get(lowerC);
                 if (Character.isUpperCase(c)) {
                     replacement = Character.toUpperCase(replacement);
                 }
